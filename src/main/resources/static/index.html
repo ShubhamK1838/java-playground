@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Playground with Auto-Indentation</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            height: 100%;
+        }
+
+        .editor {
+            flex: 3;
+            padding: 10px;
+            box-sizing: border-box;
+            border-right: 1px solid #ccc;
+            background-color: #f5f5f5;
+            position: relative;
+        }
+
+        .editor textarea {
+            width: 100%;
+            height: 90%;
+            resize: none;
+            font-family: monospace;
+            font-size: 14px;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #fff;
+        }
+
+        .run-button {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .run-button:hover {
+            background-color: #45a049;
+        }
+
+        .side-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            box-sizing: border-box;
+            background-color: #eaeaea;
+        }
+
+        .input-block, .output-block {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 10px;
+        }
+
+        .input-block:last-child, .output-block:last-child {
+            margin-bottom: 0;
+        }
+
+        .input-block label, .output-block label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .input-block textarea, .output-block textarea {
+            flex: 1;
+            resize: none;
+            font-family: monospace;
+            font-size: 14px;
+            padding: 5px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #fff;
+        }
+
+        .output-block textarea {
+            background-color: #f0f0f0;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .editor {
+                border-right: none;
+                border-bottom: 1px solid #ccc;
+            }
+
+            .side-panel {
+                flex-direction: row;
+            }
+
+            .input-block, .output-block {
+                flex: 1;
+                margin-right: 10px;
+                margin-bottom: 0;
+            }
+
+            .input-block:last-child, .output-block:last-child {
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="editor">
+        <label id="fileNameLabel" for="code">Java File Name:</label>
+        <input type="text" value="Main.java" id="filename" placeholder="Enter Java file name"/>
+        <textarea id="code" placeholder="Write your Java code here...">public class Main {
+        public static void main(String[] args)
+        {
+            System.out.println("Hello, World!");
+        }
+}
+        </textarea>
+        <button class="run-button" id="btn" onclick="runCode()">Run</button>
+    </div>
+
+
+    <div class="side-panel">
+
+        <div class="input-block">
+            <label for="input">Input:</label>
+            <textarea id="input" placeholder="Enter input for your program..."></textarea>
+        </div>
+
+        <!-- Output Block -->
+        <div class="output-block">
+            <label for="output">Output:</label>
+            <textarea id="output" readonly placeholder="Program output will appear here..."></textarea>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.getElementById("btn").addEventListener("click", (e) => {
+        console.log('executing code ');
+
+        runCode();
+
+    })
+
+    function runCode() {
+        const code = document.getElementById('code').value;
+        const input = document.getElementById('input').value;
+        const output = document.getElementById('output');
+        const name = document.getElementById("filename").value;
+
+
+        output.innerHTML = 'Executing...\n';
+
+        var data = {
+            "programData": code,
+            "programInput": input,
+            "programName": name
+        }
+
+        output.innerHTML += name + '\n';
+
+        run(data, output);
+    }
+
+    function run(data, output) {
+        fetch("/run", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        }).then((rst) => {
+            return rst.text();
+        }).then((rst) => {
+            output.innerHTML = data.programName + ":" + rst;
+        })
+
+    }
+
+</script>
+</body>
+</html>
